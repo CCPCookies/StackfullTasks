@@ -65,6 +65,8 @@ RunTaskletASM endp
 ; ---Yield Tasklet Entry---
 YieldTaskletASM proc
 	
+	mov rsp, [rcx]
+
 	ret				
 
 YieldTaskletASM endp

@@ -10,11 +10,12 @@ Tasklet::Tasklet():
 {
 };
 
-Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function) :
+Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize/* = 1000*/) :
 	m_function(function),
 	m_state(TaskletState::NOT_STARTED),
-	m_stackMemory(new unsigned __int64[1000]), // Const required
-	m_stackMemoryStart( &m_stackMemory[999] )	// Stack is upside down
+	m_stackMemory(new unsigned __int64[StackSize]), 
+	m_stackMemoryStart( &m_stackMemory[StackSize-1]),
+	m_parentRsp(&m_stackMemory[StackSize - 2])	// Stack is upside down
 {
 
 }
@@ -120,7 +121,8 @@ bool Tasklet::Run()
 
 bool Tasklet::Yield()
 {
-	YieldTaskletASM();
+	// The start of a Tasklet's stack contains the parent's stack pointer
+	YieldTaskletASM( m_parentRsp );
 
 	return m_state != TaskletState::KILLED;
 }

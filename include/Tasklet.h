@@ -6,7 +6,7 @@ class Tasklet;
 
 extern "C" int RunTaskletASM( Tasklet* activeTasklet, unsigned __int64* stackMemory );
 
-extern "C" void YieldTaskletASM();
+extern "C" void YieldTaskletASM(unsigned __int64* parentRsp);
 
 extern "C" int ResumeTaskletASM();
 
@@ -35,7 +35,7 @@ public:
 
 	Tasklet();
 
-	Tasklet(std::function<void(Tasklet* coroutine)> function);
+	Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize = 1000);
 
 	~Tasklet();
 
@@ -67,6 +67,8 @@ private:
 	unsigned __int64* m_stackMemory;
 
 	unsigned __int64* m_stackMemoryStart;
+
+	unsigned __int64* m_parentRsp;
 
 };
 
