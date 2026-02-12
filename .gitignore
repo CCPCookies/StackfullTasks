@@ -39,3 +39,10 @@
 
 # debug information files
 *.dwo
+
+### VCPGK ###
+# User generated local cmake configuration
+CMakeUserPresets.json
+
+### BUILD ###
+build/
