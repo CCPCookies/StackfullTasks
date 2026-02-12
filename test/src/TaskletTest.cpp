@@ -3,12 +3,26 @@
 #include <Task.h>
 #include <Tasklet.h>
 
-struct TaskletppLibraryTest : public TestFixture
+struct TaskletTest : public TestFixture
 {
 };
 
 // Test functions
+void TestTaskletEmpyFunction(Tasklet* tasklet)
+{
+    TestFixture::s_testInt = 1;
+}
+
 void TestTaskletYeildFunction(Tasklet* tasklet)
+{
+    TestFixture::s_testInt = 1;
+
+    tasklet->Yield();
+
+    TestFixture::s_testInt = 2;
+}
+
+void TestTaskletMultiYeildFunction(Tasklet* tasklet)
 {
     TestFixture::s_testInt = 1;
 
@@ -61,9 +75,47 @@ void TestTaskletRun(Tasklet& tasklet)
 }
 
 // ---Tasklet Tests---
-TEST_F(TaskletppLibraryTest, TestSingleTaskletYeild)
+TEST_F(TaskletTest, TestSimpleTaskletSwitch)
+{
+    Tasklet tasklet(TestTaskletEmpyFunction);
+
+    EXPECT_EQ(s_testInt, 0);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(s_testInt, 1);
+}
+
+TEST_F(TaskletTest, TestSingleTaskletYeild)
 {
     Tasklet tasklet(TestTaskletYeildFunction);
+
+    EXPECT_EQ(s_testInt, 0);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    // Should have returned before setting s_testInt to 2
+    EXPECT_EQ(s_testInt, 1);
+}
+
+TEST_F(TaskletTest, TestSingleTaskletYeildAndResume)
+{
+    Tasklet tasklet(TestTaskletYeildFunction);
+
+    EXPECT_EQ(s_testInt, 0);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(s_testInt, 1);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(s_testInt, 2);
+}
+
+TEST_F(TaskletTest, TestSingleTaskletMultipleYeilds)
+{
+    Tasklet tasklet(TestTaskletMultiYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
@@ -80,14 +132,14 @@ TEST_F(TaskletppLibraryTest, TestSingleTaskletYeild)
     EXPECT_EQ(s_testInt, 3);
 }
 
-TEST_F(TaskletppLibraryTest, TestSingleCalledOneFunctionDeepTasklet)
+TEST_F(TaskletTest, TestSingleCalledOneFunctionDeepTasklet)
 {
     TestTaskletOneFunctionDeep();
 
     EXPECT_EQ(s_testInt, 3);
 }
 
-TEST_F(TaskletppLibraryTest, TestYieldThenRunFromDeeperLayer)
+TEST_F(TaskletTest, TestYieldThenRunFromDeeperLayer)
 {
     Tasklet tasklet(TestTaskletYeildFunction);
 
@@ -102,7 +154,7 @@ TEST_F(TaskletppLibraryTest, TestYieldThenRunFromDeeperLayer)
     EXPECT_EQ(s_testInt, 2);
 }
 
-TEST_F(TaskletppLibraryTest, TestSingleTaskletWithBase)
+TEST_F(TaskletTest, TestSingleTaskletWithBase)
 {
     Tasklet tasklet(TestTaskletYeildFunctionWithBase);
 
@@ -125,7 +177,7 @@ TEST_F(TaskletppLibraryTest, TestSingleTaskletWithBase)
     EXPECT_EQ(s_testInt, 3);
 }
 
-TEST_F(TaskletppLibraryTest, TestSingleTaskletKill)
+TEST_F(TaskletTest, TestSingleTaskletKill)
 {
     Tasklet tasklet(TestTaskletKill);
 

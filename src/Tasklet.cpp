@@ -2,21 +2,26 @@
 
 #include <sstream>
 
-
+// Can create an invalid Tasklet by using this directly.
+// Need to restructure to ensure this is not possible
+// This constuctor exists to for Task
 Tasklet::Tasklet():
 	m_state(TaskletState::NOT_STARTED)
 {
 };
 
-Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function):
+Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function) :
 	m_function(function),
-	m_state(TaskletState::NOT_STARTED)
+	m_state(TaskletState::NOT_STARTED),
+	m_stackMemory(new unsigned __int64[1000]), // Const required
+	m_stackMemoryStart( &m_stackMemory[999] )	// Stack is upside down
 {
+
 }
 
 Tasklet::~Tasklet()
 {
-
+	delete[] m_stackMemory;
 }
 
 void Tasklet::RunFunction()
@@ -74,7 +79,7 @@ bool Tasklet::Run()
 	{
 		case TaskletState::NOT_STARTED:
 		{
-			int taskletReturnStatus = RunTaskletASM(this);
+			int taskletReturnStatus = RunTaskletASM( this, m_stackMemoryStart);
 
 			UpdateStatusFromCode(taskletReturnStatus);
 
@@ -99,6 +104,12 @@ bool Tasklet::Run()
 
 		case TaskletState::ERROR:
 		{
+			return false;
+		}
+
+		default:
+		{
+			// Unknown also matches as error
 			return false;
 		}
 	}

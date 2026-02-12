@@ -4,7 +4,7 @@
 
 class Tasklet;
 
-extern "C" int RunTaskletASM( Tasklet* tasklet );
+extern "C" int RunTaskletASM( Tasklet* activeTasklet, unsigned __int64* stackMemory );
 
 extern "C" void YieldTaskletASM();
 
@@ -16,6 +16,8 @@ extern "C" int ResumeTaskletASM();
 #define TASKLET_STATE_KILLED_CODE 3
 #define TASKLET_STATE_ERROR_CODE 4
 #define TASKLET_STATE_UNKNOWN_CODE 5
+
+#define TASKLET_STACK_SIZE = 1000
 
 enum class TaskletState
 {
@@ -61,6 +63,10 @@ private:
 	TaskletState m_state;
 
 	std::function<void(Tasklet* coroutine)> m_function;
+
+	unsigned __int64* m_stackMemory;
+
+	unsigned __int64* m_stackMemoryStart;
 
 };
 
