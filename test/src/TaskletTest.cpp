@@ -73,6 +73,25 @@ void TestTaskletRun(Tasklet& tasklet)
     EXPECT_TRUE(tasklet.Run());
 }
 
+void TestCreateAndRunTasklet(Tasklet* activeTasklet)
+{
+    TestFixture::s_testInt = 1;
+
+    activeTasklet->Yield();
+
+    Tasklet innerTasklet(TestTaskletYeildFunction);
+
+    EXPECT_TRUE(innerTasklet.Run());
+
+    EXPECT_EQ(TestFixture::s_testInt, 1);
+
+    EXPECT_TRUE(innerTasklet.Run());
+
+    EXPECT_EQ(TestFixture::s_testInt, 2);
+
+    TestFixture::s_testInt = 3;
+}
+
 // ---Tasklet Tests---
 TEST_F(TaskletTest, TestSimpleTaskletSwitch)
 {
@@ -199,5 +218,21 @@ TEST_F(TaskletTest, TestSingleTaskletWithBase)
     EXPECT_EQ(s_testInt, 2);
 
     EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+
+}
+
+TEST_F(TaskletTest, TestCreateAndRunTaskletInsideTasklet)
+{
+    Tasklet tasklet(TestCreateAndRunTasklet);
+
+    EXPECT_EQ(s_testInt, 0);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(s_testInt, 1);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(s_testInt, 3);
 
 }
