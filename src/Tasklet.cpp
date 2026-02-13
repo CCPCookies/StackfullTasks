@@ -169,5 +169,18 @@ TaskletState Tasklet::GetState()
 
 bool Tasklet::SetParent(Tasklet* parent)
 {
-	return false;
+	// Only update if a valid new parent has been passed in.
+	// The tasklet must have already started for a parent change
+	// to make sense.
+	if ((parent->GetState() == TaskletState::NOT_STARTED)
+		|| (parent->GetState() == TaskletState::FINISHED)
+		|| (parent->GetState() == TaskletState::ERROR)
+		|| (parent->GetState() == TaskletState::UNKNOWN))
+	{
+		return false;
+	}
+
+	*m_parentRsp = parent->m_rspAtYield;
+
+	return true;
 }
