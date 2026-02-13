@@ -9,7 +9,7 @@ struct TaskTest : public TestFixture
 
 // Test functions
 
-std::string TestTaskWithArgumentsAndReturnFunction(Tasklet* tasklet, std::string a, std::string b)
+std::string TestTaskWithArgumentsAndReturnFunction(StackfullTasks::Tasklet* tasklet, std::string a, std::string b)
 {
     std::string c = a + b;
 
@@ -27,19 +27,19 @@ TEST_F(TaskTest, TestTaskWithArgumentsAndReturn)
     std::string a = "Hello";
     std::string b = "World";
 
-    Task<std::string, std::string, std::string> task(TestTaskWithArgumentsAndReturnFunction);
+    StackfullTasks::Task<std::string, std::string, std::string> task(TestTaskWithArgumentsAndReturnFunction);
 
     task.Bind(a, b);
 
     EXPECT_TRUE( task.Run() );
 
-    EXPECT_EQ(task.GetState(), TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     EXPECT_EQ(TestFixture::s_testInt, 1);
 
     EXPECT_TRUE( task.Run() );
 
-    EXPECT_EQ(task.GetState(), TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(TestFixture::s_testInt, 2);
 
@@ -48,7 +48,7 @@ TEST_F(TaskTest, TestTaskWithArgumentsAndReturn)
     EXPECT_EQ(stringReturn, a + b);
 }
 
-bool TestTaskletYeildFunction(Tasklet* tasklet, int a, int b)
+bool TestTaskletYeildFunction(StackfullTasks::Tasklet* tasklet, int a, int b)
 {
     TestFixture::s_testInt = a;
 
@@ -59,7 +59,7 @@ bool TestTaskletYeildFunction(Tasklet* tasklet, int a, int b)
     return true;
 }
 
-bool TestTaskletSetParentFunction(Tasklet* tasklet, Tasklet* newParent, int a, int b)
+bool TestTaskletSetParentFunction(StackfullTasks::Tasklet* tasklet, StackfullTasks::Tasklet* newParent, int a, int b)
 {
     tasklet->SetParent(newParent);
 
@@ -75,7 +75,7 @@ bool TestTaskletSetParentFunction(Tasklet* tasklet, Tasklet* newParent, int a, i
 TEST_F(TaskTest, TestTaskWithParentChange)
 {
     // Run to yield and get back to main
-    Task<bool, int, int> task1(TestTaskletYeildFunction);
+    StackfullTasks::Task<bool, int, int> task1(TestTaskletYeildFunction);
 
     int a = 1;
     int b = 2;
@@ -89,7 +89,7 @@ TEST_F(TaskTest, TestTaskWithParentChange)
     // Run another from main (parent is then main), pass in the first and internally change parent
     // Then when yield is hit it will switch to task1 rather than back to main which was the origional
     // parent
-    Task<bool, Tasklet*, int, int > task2(TestTaskletSetParentFunction);
+    StackfullTasks::Task<bool, StackfullTasks::Tasklet*, int, int > task2(TestTaskletSetParentFunction);
 
     int c = 3;
     int d = 4;

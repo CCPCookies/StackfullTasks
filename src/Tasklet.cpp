@@ -2,37 +2,40 @@
 
 #include <sstream>
 
-Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize/* = 1000*/) :
-	m_function(function),
-	m_state(TaskletState::NOT_STARTED),
-	m_stackMemory(new unsigned __int64[StackSize]), 
-	m_stackMemoryStart( &m_stackMemory[StackSize-1]),
-	m_parentRsp(&m_stackMemory[StackSize - 2])	// Stack is upside down
+namespace StackfullTasks
 {
 
-}
-
-Tasklet::~Tasklet()
-{
-	delete[] m_stackMemory;
-}
-
-void Tasklet::RunFunction()
-{
-	m_function(this);
-}
-
-extern "C" void TaskletFunctionEntry(Tasklet* activeTasklet)
-{
-	activeTasklet->RunFunction();
-	
-	return;
-}
-
-void Tasklet::UpdateStatusFromCode(int statusCode)
-{
-	switch (statusCode)
+	Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize/* = 1000*/) :
+		m_function(function),
+		m_state(TaskletState::NOT_STARTED),
+		m_stackMemory(new unsigned __int64[StackSize]),
+		m_stackMemoryStart(&m_stackMemory[StackSize - 1]),
+		m_parentRsp(&m_stackMemory[StackSize - 2])	// Stack is upside down
 	{
+
+	}
+
+	Tasklet::~Tasklet()
+	{
+		delete[] m_stackMemory;
+	}
+
+	void Tasklet::RunFunction()
+	{
+		m_function(this);
+	}
+
+	extern "C" void TaskletFunctionEntry(Tasklet* activeTasklet)
+	{
+		activeTasklet->RunFunction();
+
+		return;
+	}
+
+	void Tasklet::UpdateStatusFromCode(int statusCode)
+	{
+		switch (statusCode)
+		{
 		case TASKLET_STATE_NOT_STARTED_CODE:
 		{
 			m_state = TaskletState::NOT_STARTED;
@@ -62,17 +65,17 @@ void Tasklet::UpdateStatusFromCode(int statusCode)
 		{
 			m_state = TaskletState::UNKNOWN;
 		}
+		}
 	}
-}
 
-bool Tasklet::Run()
-{
-
-	switch (m_state)
+	bool Tasklet::Run()
 	{
+
+		switch (m_state)
+		{
 		case TaskletState::NOT_STARTED:
 		{
-			int taskletReturnStatus = RunTaskletASM( this, m_stackMemoryStart);
+			int taskletReturnStatus = RunTaskletASM(this, m_stackMemoryStart);
 
 			UpdateStatusFromCode(taskletReturnStatus);
 
@@ -82,7 +85,7 @@ bool Tasklet::Run()
 		case TaskletState::KILLED:
 		case TaskletState::SUSPENDED:
 		{
-			int taskletReturnStatus = ResumeTaskletASM( m_parentRsp, &m_rspAtYield);
+			int taskletReturnStatus = ResumeTaskletASM(m_parentRsp, &m_rspAtYield);
 
 			UpdateStatusFromCode(taskletReturnStatus);
 
@@ -105,82 +108,84 @@ bool Tasklet::Run()
 			// Unknown also matches as error
 			return false;
 		}
+		}
+
+		return true;
+
 	}
 
-	return true;
-
-}
-
-bool Tasklet::Yield()
-{
-	// The start of a Tasklet's stack contains the parent's stack pointer
-	YieldTaskletASM( m_parentRsp, &m_rspAtYield);
-
-	return m_state != TaskletState::KILLED;
-}
-
-bool Tasklet::Kill()
-{
-	switch (m_state)
+	bool Tasklet::Yield()
 	{
-	case TaskletState::NOT_STARTED:
+		// The start of a Tasklet's stack contains the parent's stack pointer
+		YieldTaskletASM(m_parentRsp, &m_rspAtYield);
+
+		return m_state != TaskletState::KILLED;
+	}
+
+	bool Tasklet::Kill()
 	{
-		m_state = TaskletState::FINISHED;
+		switch (m_state)
+		{
+		case TaskletState::NOT_STARTED:
+		{
+			m_state = TaskletState::FINISHED;
+			return true;
+		}
+		case TaskletState::KILLED:
+		{
+			return true;
+		}
+		case TaskletState::SUSPENDED:
+		{
+			m_state = TaskletState::KILLED;
+
+			return Run();
+		}
+		case TaskletState::FINISHED:
+		{
+			return false;
+		}
+
+		case TaskletState::ERROR:
+		{
+			return false;
+		}
+
+		default:
+		{
+			return false;
+		}
+
+		}
+
+	}
+
+	bool Tasklet::IsFinished()
+	{
+		return m_state == TaskletState::FINISHED;
+	}
+
+	TaskletState Tasklet::GetState()
+	{
+		return m_state;
+	}
+
+	bool Tasklet::SetParent(Tasklet* parent)
+	{
+		// Only update if a valid new parent has been passed in.
+		// The tasklet must have already started for a parent change
+		// to make sense.
+		if ((parent->GetState() == TaskletState::NOT_STARTED)
+			|| (parent->GetState() == TaskletState::FINISHED)
+			|| (parent->GetState() == TaskletState::ERROR)
+			|| (parent->GetState() == TaskletState::UNKNOWN))
+		{
+			return false;
+		}
+
+		*m_parentRsp = parent->m_rspAtYield;
+
 		return true;
 	}
-	case TaskletState::KILLED:
-	{
-		return true;
-	}
-	case TaskletState::SUSPENDED:
-	{
-		m_state = TaskletState::KILLED;
 
-		return Run();
-	}
-	case TaskletState::FINISHED:
-	{
-		return false;
-	}
-
-	case TaskletState::ERROR:
-	{
-		return false;
-	}
-
-	default:
-	{
-		return false;
-	}
-
-	}
-
-}
-
-bool Tasklet::IsFinished()
-{
-	return m_state == TaskletState::FINISHED;
-}
-
-TaskletState Tasklet::GetState()
-{
-	return m_state;
-}
-
-bool Tasklet::SetParent(Tasklet* parent)
-{
-	// Only update if a valid new parent has been passed in.
-	// The tasklet must have already started for a parent change
-	// to make sense.
-	if ((parent->GetState() == TaskletState::NOT_STARTED)
-		|| (parent->GetState() == TaskletState::FINISHED)
-		|| (parent->GetState() == TaskletState::ERROR)
-		|| (parent->GetState() == TaskletState::UNKNOWN))
-	{
-		return false;
-	}
-
-	*m_parentRsp = parent->m_rspAtYield;
-
-	return true;
 }

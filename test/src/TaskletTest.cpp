@@ -8,12 +8,12 @@ struct TaskletTest : public TestFixture
 };
 
 // Test functions
-void TestTaskletEmpyFunction(Tasklet* tasklet)
+void TestTaskletEmpyFunction(StackfullTasks::Tasklet* tasklet)
 {
     TestFixture::s_testInt = 1;
 }
 
-void TestTaskletYeildFunction(Tasklet* tasklet)
+void TestTaskletYeildFunction(StackfullTasks::Tasklet* tasklet)
 {
     TestFixture::s_testInt = 1;
 
@@ -22,7 +22,7 @@ void TestTaskletYeildFunction(Tasklet* tasklet)
     TestFixture::s_testInt = 2;
 }
 
-void TestTaskletMultiYeildFunction(Tasklet* tasklet)
+void TestTaskletMultiYeildFunction(StackfullTasks::Tasklet* tasklet)
 {
     TestFixture::s_testInt = 1;
 
@@ -35,7 +35,7 @@ void TestTaskletMultiYeildFunction(Tasklet* tasklet)
     TestFixture::s_testInt = 3;
 }
 
-void TestTaskletYeildFunctionWithBase(Tasklet* tasklet)
+void TestTaskletYeildFunctionWithBase(StackfullTasks::Tasklet* tasklet)
 {
     TestFixture::s_testInt = -1;
 
@@ -44,7 +44,7 @@ void TestTaskletYeildFunctionWithBase(Tasklet* tasklet)
     TestTaskletYeildFunction(tasklet);
 }
 
-void TestTaskletKill(Tasklet* tasklet)
+void TestTaskletKill(StackfullTasks::Tasklet* tasklet)
 {
     TestFixture::s_testInt = 1;
     
@@ -61,25 +61,25 @@ void TestTaskletKill(Tasklet* tasklet)
 
 void TestTaskletOneFunctionDeep()
 {
-    Tasklet tasklet(TestTaskletYeildFunction);
+    StackfullTasks::Tasklet tasklet(TestTaskletYeildFunction);
 
     EXPECT_TRUE(tasklet.Run());
     EXPECT_TRUE(tasklet.Run());
 
 }
 
-void TestTaskletRun(Tasklet& tasklet)
+void TestTaskletRun(StackfullTasks::Tasklet& tasklet)
 {
     EXPECT_TRUE(tasklet.Run());
 }
 
-void TestCreateAndRunTasklet(Tasklet* activeTasklet)
+void TestCreateAndRunTasklet(StackfullTasks::Tasklet* activeTasklet)
 {
     TestFixture::s_testInt = 1;
 
     activeTasklet->Yield();
 
-    Tasklet innerTasklet(TestTaskletYeildFunction);
+    StackfullTasks::Tasklet innerTasklet(TestTaskletYeildFunction);
 
     EXPECT_TRUE(innerTasklet.Run());
 
@@ -95,26 +95,26 @@ void TestCreateAndRunTasklet(Tasklet* activeTasklet)
 // ---Tasklet Tests---
 TEST_F(TaskletTest, TestSimpleTaskletSwitch)
 {
-    Tasklet tasklet(TestTaskletEmpyFunction);
+    StackfullTasks::Tasklet tasklet(TestTaskletEmpyFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
     EXPECT_TRUE(tasklet.Run());
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 1);
 }
 
 TEST_F(TaskletTest, TestSingleTaskletYeild)
 {
-    Tasklet tasklet(TestTaskletYeildFunction);
+    StackfullTasks::Tasklet tasklet(TestTaskletYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
     EXPECT_TRUE(tasklet.Run());
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::SUSPENDED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     // Should have returned before setting s_testInt to 2
     EXPECT_EQ(s_testInt, 1);
@@ -122,26 +122,26 @@ TEST_F(TaskletTest, TestSingleTaskletYeild)
 
 TEST_F(TaskletTest, TestSingleTaskletYeildAndResume)
 {
-    Tasklet tasklet(TestTaskletYeildFunction);
+    StackfullTasks::Tasklet tasklet(TestTaskletYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
     EXPECT_TRUE(tasklet.Run());
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::SUSPENDED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     EXPECT_EQ(s_testInt, 1);
 
     EXPECT_TRUE(tasklet.Run());
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 2);
 }
 
 TEST_F(TaskletTest, TestSingleTaskletMultipleYeilds)
 {
-    Tasklet tasklet(TestTaskletMultiYeildFunction);
+    StackfullTasks::Tasklet tasklet(TestTaskletMultiYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
@@ -160,19 +160,19 @@ TEST_F(TaskletTest, TestSingleTaskletMultipleYeilds)
 
 TEST_F(TaskletTest, TestSingleTaskletYeildAndKill)
 {
-    Tasklet tasklet(TestTaskletKill);
+    StackfullTasks::Tasklet tasklet(TestTaskletKill);
 
     EXPECT_EQ(s_testInt, 0);
 
     EXPECT_TRUE(tasklet.Run());
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::SUSPENDED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     EXPECT_EQ(s_testInt, 1);
 
     EXPECT_TRUE(tasklet.Kill());
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 3);
 }
@@ -186,7 +186,7 @@ TEST_F(TaskletTest, TestSingleCalledOneFunctionDeepTasklet)
 
 TEST_F(TaskletTest, TestYieldThenRunFromDeeperLayer)
 {
-    Tasklet tasklet(TestTaskletYeildFunction);
+    StackfullTasks::Tasklet tasklet(TestTaskletYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
@@ -201,7 +201,7 @@ TEST_F(TaskletTest, TestYieldThenRunFromDeeperLayer)
 
 TEST_F(TaskletTest, TestSingleTaskletWithBase)
 {
-    Tasklet tasklet(TestTaskletYeildFunctionWithBase);
+    StackfullTasks::Tasklet tasklet(TestTaskletYeildFunctionWithBase);
 
     EXPECT_EQ(s_testInt, 0);
 
@@ -217,13 +217,13 @@ TEST_F(TaskletTest, TestSingleTaskletWithBase)
 
     EXPECT_EQ(s_testInt, 2);
 
-    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
 
 }
 
 TEST_F(TaskletTest, TestCreateAndRunTaskletInsideTasklet)
 {
-    Tasklet tasklet(TestCreateAndRunTasklet);
+    StackfullTasks::Tasklet tasklet(TestCreateAndRunTasklet);
 
     EXPECT_EQ(s_testInt, 0);
 
