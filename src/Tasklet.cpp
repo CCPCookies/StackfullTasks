@@ -90,7 +90,7 @@ bool Tasklet::Run()
 		case TaskletState::KILLED:
 		case TaskletState::SUSPENDED:
 		{
-			int taskletReturnStatus = ResumeTaskletASM();
+			int taskletReturnStatus = ResumeTaskletASM( m_parentRsp, &m_rspAtYield);
 
 			UpdateStatusFromCode(taskletReturnStatus);
 
@@ -122,7 +122,7 @@ bool Tasklet::Run()
 bool Tasklet::Yield()
 {
 	// The start of a Tasklet's stack contains the parent's stack pointer
-	YieldTaskletASM( m_parentRsp );
+	YieldTaskletASM( m_parentRsp, &m_rspAtYield);
 
 	return m_state != TaskletState::KILLED;
 }

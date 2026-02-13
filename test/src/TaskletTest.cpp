@@ -65,7 +65,6 @@ void TestTaskletOneFunctionDeep()
 
     EXPECT_TRUE(tasklet.Run());
     EXPECT_TRUE(tasklet.Run());
-    EXPECT_TRUE(tasklet.Run());
 
 }
 
@@ -83,6 +82,8 @@ TEST_F(TaskletTest, TestSimpleTaskletSwitch)
 
     EXPECT_TRUE(tasklet.Run());
 
+    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+
     EXPECT_EQ(s_testInt, 1);
 }
 
@@ -93,6 +94,8 @@ TEST_F(TaskletTest, TestSingleTaskletYeild)
     EXPECT_EQ(s_testInt, 0);
 
     EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(tasklet.GetState(), TaskletState::SUSPENDED);
 
     // Should have returned before setting s_testInt to 2
     EXPECT_EQ(s_testInt, 1);
@@ -106,9 +109,13 @@ TEST_F(TaskletTest, TestSingleTaskletYeildAndResume)
 
     EXPECT_TRUE(tasklet.Run());
 
+    EXPECT_EQ(tasklet.GetState(), TaskletState::SUSPENDED);
+
     EXPECT_EQ(s_testInt, 1);
 
     EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 2);
 }
@@ -132,11 +139,30 @@ TEST_F(TaskletTest, TestSingleTaskletMultipleYeilds)
     EXPECT_EQ(s_testInt, 3);
 }
 
+TEST_F(TaskletTest, TestSingleTaskletYeildAndKill)
+{
+    Tasklet tasklet(TestTaskletKill);
+
+    EXPECT_EQ(s_testInt, 0);
+
+    EXPECT_TRUE(tasklet.Run());
+
+    EXPECT_EQ(tasklet.GetState(), TaskletState::SUSPENDED);
+
+    EXPECT_EQ(s_testInt, 1);
+
+    EXPECT_TRUE(tasklet.Kill());
+
+    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
+
+    EXPECT_EQ(s_testInt, 3);
+}
+
 TEST_F(TaskletTest, TestSingleCalledOneFunctionDeepTasklet)
 {
     TestTaskletOneFunctionDeep();
 
-    EXPECT_EQ(s_testInt, 3);
+    EXPECT_EQ(s_testInt, 2);
 }
 
 TEST_F(TaskletTest, TestYieldThenRunFromDeeperLayer)
@@ -172,23 +198,6 @@ TEST_F(TaskletTest, TestSingleTaskletWithBase)
 
     EXPECT_EQ(s_testInt, 2);
 
-    EXPECT_TRUE(tasklet.Run());
-
-    EXPECT_EQ(s_testInt, 3);
-}
-
-TEST_F(TaskletTest, TestSingleTaskletKill)
-{
-    Tasklet tasklet(TestTaskletKill);
-
-    EXPECT_EQ(s_testInt, 0);
-
-    EXPECT_TRUE(tasklet.Run());
-
-    EXPECT_EQ(s_testInt, 1);
-
-    EXPECT_TRUE(tasklet.Kill());
-
-    EXPECT_EQ(s_testInt, 3);
+    EXPECT_EQ(tasklet.GetState(), TaskletState::FINISHED);
 
 }

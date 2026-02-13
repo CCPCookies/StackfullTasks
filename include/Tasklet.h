@@ -6,9 +6,9 @@ class Tasklet;
 
 extern "C" int RunTaskletASM( Tasklet* activeTasklet, unsigned __int64* stackMemory );
 
-extern "C" void YieldTaskletASM(unsigned __int64* parentRsp);
+extern "C" void YieldTaskletASM(unsigned __int64* parentRsp, unsigned __int64* rspAtYield);
 
-extern "C" int ResumeTaskletASM();
+extern "C" int ResumeTaskletASM(unsigned __int64* parentRsp, unsigned __int64* rspAtYield);
 
 #define TASKLET_STATE_NOT_STARTED_CODE 0
 #define TASKLET_STATE_SUSPENDED_CODE 1
@@ -69,6 +69,8 @@ private:
 	unsigned __int64* m_stackMemoryStart;
 
 	unsigned __int64* m_parentRsp;
+
+	unsigned __int64 m_rspAtYield;
 
 };
 
