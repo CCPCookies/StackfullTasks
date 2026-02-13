@@ -8,6 +8,7 @@ class Task : public Tasklet
 public:
 
 	Task(std::function<ReturnType(Tasklet*,ArgumentTypes... values)> function):
+		Tasklet(nullptr),
 		m_function(function)
 	{
 

@@ -13,7 +13,11 @@ std::string TestTaskWithArgumentsAndReturnFunction(Tasklet* tasklet, std::string
 {
     std::string c = a + b;
 
+    TestFixture::s_testInt = 1;
+
     tasklet->Yield();
+
+    TestFixture::s_testInt = 2;
 
     return c;
 }
@@ -23,18 +27,23 @@ TEST_F(TaskTest, TestTaskWithArgumentsAndReturn)
     std::string a = "Hello";
     std::string b = "World";
 
-    Task<std::string, std::string, std::string> stringVariadic(TestTaskWithArgumentsAndReturnFunction);
+    Task<std::string, std::string, std::string> task(TestTaskWithArgumentsAndReturnFunction);
 
-    stringVariadic.Bind(a, b);
+    task.Bind(a, b);
 
-    bool res = stringVariadic.Run();
+    EXPECT_TRUE( task.Run() );
 
-    while (!stringVariadic.IsFinished())
-    {
-        res = stringVariadic.Run();
-    }
+    EXPECT_EQ(task.GetState(), TaskletState::SUSPENDED);
 
-    std::string stringReturn = stringVariadic.GetReturnValue();
+    EXPECT_EQ(TestFixture::s_testInt, 1);
+
+    EXPECT_TRUE( task.Run() );
+
+    EXPECT_EQ(task.GetState(), TaskletState::FINISHED);
+
+    EXPECT_EQ(TestFixture::s_testInt, 2);
+
+    std::string stringReturn = task.GetReturnValue();
 
     EXPECT_EQ(stringReturn, a + b);
 }

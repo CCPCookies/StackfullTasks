@@ -33,8 +33,6 @@ class Tasklet
 {
 public:
 
-	Tasklet();
-
 	Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize = 1000);
 
 	~Tasklet();

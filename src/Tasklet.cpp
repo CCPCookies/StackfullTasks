@@ -2,14 +2,6 @@
 
 #include <sstream>
 
-// Can create an invalid Tasklet by using this directly.
-// Need to restructure to ensure this is not possible
-// This constuctor exists to for Task
-Tasklet::Tasklet():
-	m_state(TaskletState::NOT_STARTED)
-{
-};
-
 Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize/* = 1000*/) :
 	m_function(function),
 	m_state(TaskletState::NOT_STARTED),
