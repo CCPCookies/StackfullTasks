@@ -61,10 +61,10 @@ void TestTaskKill(StackfullTasks::Tasklet* tasklet)
 
 void TestTaskOneFunctionDeep()
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskYeildFunction);
+    StackfullTasks::SimpleTask task(TestTaskYeildFunction);
 
-    EXPECT_TRUE(tasklet.Run());
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
+    EXPECT_TRUE(task.Run());
 
 }
 
@@ -79,42 +79,42 @@ void TestCreateAndRunTask(StackfullTasks::Tasklet* activeTasklet)
 
     activeTasklet->Yield();
 
-    StackfullTasks::SimpleTask innerTasklet(TestTaskYeildFunction);
+    StackfullTasks::SimpleTask innerTask(TestTaskYeildFunction);
 
-    EXPECT_TRUE(innerTasklet.Run());
+    EXPECT_TRUE(innerTask.Run());
 
     EXPECT_EQ(TestFixture::s_testInt, 1);
 
-    EXPECT_TRUE(innerTasklet.Run());
+    EXPECT_TRUE(innerTask.Run());
 
     EXPECT_EQ(TestFixture::s_testInt, 2);
 
     TestFixture::s_testInt = 3;
 }
 
-// ---Tasklet Tests---
+// ---Task Tests---
 TEST_F(SimpleTaskTest, TestSimpleTaskSwitch)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskEmpyFunction);
+    StackfullTasks::SimpleTask task(TestTaskEmpyFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 1);
 }
 
 TEST_F(SimpleTaskTest, TestSingleTaskYeild)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskYeildFunction);
+    StackfullTasks::SimpleTask task(TestTaskYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     // Should have returned before setting s_testInt to 2
     EXPECT_EQ(s_testInt, 1);
@@ -122,57 +122,57 @@ TEST_F(SimpleTaskTest, TestSingleTaskYeild)
 
 TEST_F(SimpleTaskTest, TestSingleTaskYeildAndResume)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskYeildFunction);
+    StackfullTasks::SimpleTask task(TestTaskYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     EXPECT_EQ(s_testInt, 1);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 2);
 }
 
 TEST_F(SimpleTaskTest, TestSingleTaskMultipleYeilds)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskMultiYeildFunction);
+    StackfullTasks::SimpleTask task(TestTaskMultiYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 1);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 2);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 3);
 }
 
 TEST_F(SimpleTaskTest, TestSingleTaskYeildAndKill)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskKill);
+    StackfullTasks::SimpleTask task(TestTaskKill);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
 
     EXPECT_EQ(s_testInt, 1);
 
-    EXPECT_TRUE(tasklet.Kill());
+    EXPECT_TRUE(task.Kill());
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
 
     EXPECT_EQ(s_testInt, 3);
 }
@@ -186,52 +186,52 @@ TEST_F(SimpleTaskTest, TestSingleCalledOneFunctionDeepTask)
 
 TEST_F(SimpleTaskTest, TestYieldThenRunFromDeeperLayer)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskYeildFunction);
+    StackfullTasks::SimpleTask task(TestTaskYeildFunction);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 1);
 
-    TestTaskRun(tasklet);
+    TestTaskRun(task);
 
     EXPECT_EQ(s_testInt, 2);
 }
 
-TEST_F(SimpleTaskTest, TestSingleTaskletWithBase)
+TEST_F(SimpleTaskTest, TestSingleTaskWithBase)
 {
-    StackfullTasks::SimpleTask tasklet(TestTaskYeildFunctionWithBase);
+    StackfullTasks::SimpleTask task(TestTaskYeildFunctionWithBase);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, -1);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 1);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 2);
 
-    EXPECT_EQ(tasklet.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
 
 }
 
-TEST_F(SimpleTaskTest, TestCreateAndRunTaskInsideTasklet)
+TEST_F(SimpleTaskTest, TestCreateAndRunTaskInsideTask)
 {
-    StackfullTasks::SimpleTask tasklet(TestCreateAndRunTask);
+    StackfullTasks::SimpleTask task(TestCreateAndRunTask);
 
     EXPECT_EQ(s_testInt, 0);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 1);
 
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(task.Run());
 
     EXPECT_EQ(s_testInt, 3);
 
