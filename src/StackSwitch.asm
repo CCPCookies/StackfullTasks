@@ -5,7 +5,6 @@ extern TaskletFunctionEntry : proto	;The main entry point, needs to have a refer
 
 .code
 
-
 StartNewTasklet proc
 	; At this point the stack will contain the return instruction
 

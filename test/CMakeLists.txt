@@ -5,7 +5,7 @@ enable_testing()
 find_package(GTest CONFIG REQUIRED)
 
 set(SRC_FILES
-    src/TaskletTest.cpp
+    src/SimpleTaskTest.cpp
     src/TaskTest.cpp
     src/TestFixture.cpp
     src/TestFixture.h

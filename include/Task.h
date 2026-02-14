@@ -11,7 +11,7 @@ namespace StackfullTasks
 	public:
 
 		Task(std::function<ReturnType(Tasklet*, ArgumentTypes... values)> function) :
-			Tasklet(nullptr),
+			Tasklet(),
 			m_function(function)
 		{
 
@@ -22,14 +22,14 @@ namespace StackfullTasks
 			m_arguments = std::make_tuple(arguments...);
 		}
 
-		virtual void RunFunction() override
-		{
-			m_return = RunInternal();
-		};
-
 		ReturnType GetReturnValue()
 		{
 			return m_return;
+		}
+
+		virtual void RunFunction() override
+		{
+			m_return = RunInternal();
 		}
 
 	private:

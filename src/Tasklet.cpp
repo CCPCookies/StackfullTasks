@@ -5,8 +5,7 @@
 namespace StackfullTasks
 {
 
-	Tasklet::Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize/* = 1000*/) :
-		m_function(function),
+	Tasklet::Tasklet( unsigned int StackSize/* = 1000*/) :
 		m_state(TaskletState::NOT_STARTED),
 		m_stackMemory(new unsigned __int64[StackSize]),
 		m_stackMemoryStart(&m_stackMemory[StackSize - 1]),
@@ -18,11 +17,6 @@ namespace StackfullTasks
 	Tasklet::~Tasklet()
 	{
 		delete[] m_stackMemory;
-	}
-
-	void Tasklet::RunFunction()
-	{
-		m_function(this);
 	}
 
 	extern "C" void TaskletFunctionEntry(Tasklet* activeTasklet)

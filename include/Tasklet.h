@@ -34,7 +34,7 @@ namespace StackfullTasks
 	{
 	public:
 
-		Tasklet(std::function<void(Tasklet* coroutine)> function, unsigned int StackSize = 1000);
+		Tasklet(unsigned int StackSize = 1000);
 
 		~Tasklet();
 
@@ -46,11 +46,11 @@ namespace StackfullTasks
 
 		TaskletState GetState();
 
-		virtual void RunFunction();
-
 		bool IsFinished();
 
 		bool SetParent(Tasklet* parent);
+
+		virtual void RunFunction() = 0;
 
 	private:
 
@@ -60,8 +60,6 @@ namespace StackfullTasks
 
 
 		TaskletState m_state;
-
-		std::function<void(Tasklet* coroutine)> m_function;
 
 		unsigned __int64* m_stackMemory;
 

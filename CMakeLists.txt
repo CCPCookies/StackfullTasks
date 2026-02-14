@@ -5,10 +5,12 @@ project(stackfullTasks VERSION 1.0.0)
 enable_language(C ASM_MASM)
 
 set(SRC_FILES
-    src/StackSwitch.asm
-    src/Tasklet.cpp
     include/Tasklet.h
     include/Task.h
+    include/SimpleTask.h
+    src/StackSwitch.asm
+    src/Tasklet.cpp
+    src/SimpleTask.cpp
 )
 
 add_library(stackfullTasks ${SRC_FILES})
