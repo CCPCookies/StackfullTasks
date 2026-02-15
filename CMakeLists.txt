@@ -25,7 +25,10 @@ target_include_directories(stackfullTasks
 
 target_compile_features(stackfullTasks PRIVATE cxx_std_17)
 
-add_subdirectory(test)
+option(BUILD_TESTING "Enable Test Project" OFF)
+if (BUILD_TESTING)
+    add_subdirectory(test)
+endif ()
 
 install(FILES ${INCLUDE_FILES} DESTINATION include)
 
