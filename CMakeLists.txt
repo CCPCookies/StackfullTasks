@@ -43,5 +43,5 @@ install(FILES ${INCLUDE_FILES} DESTINATION include)
 
 install(EXPORT stackfullTasksTarget
         DESTINATION share/stackfull-tasks
-        FILE stackfullTasksTargets.cmake
+        FILE stackfull-tasksConfig.cmake
 )
