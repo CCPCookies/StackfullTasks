@@ -35,8 +35,9 @@ endif ()
 install(
         TARGETS stackfullTasks
         EXPORT stackfullTasksTarget
-        CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+        ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
 )
 
 install(FILES ${INCLUDE_FILES} DESTINATION include)
