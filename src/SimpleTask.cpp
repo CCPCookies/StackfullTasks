@@ -5,8 +5,8 @@
 namespace StackfullTasks
 {
 
-	SimpleTask::SimpleTask(std::function<void(Tasklet* coroutine)> function):
-		Tasklet(),
+	SimpleTask::SimpleTask(std::function<void(Fibre* coroutine)> function):
+		Fibre(),
 		m_function(function)
 	{
 

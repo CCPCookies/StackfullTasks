@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Tasklet.h"
+#include "Fibre.h"
 
 namespace StackfullTasks
 {
 
 	template <typename ReturnType, class... ArgumentTypes>
-	class Task : public Tasklet
+	class Task : public Fibre
 	{
 	public:
 
-		Task(std::function<ReturnType(Tasklet*, ArgumentTypes... values)> function) :
-			Tasklet(),
+		Task(std::function<ReturnType(Fibre*, ArgumentTypes... values)> function) :
+			Fibre(),
 			m_function(function)
 		{
 
@@ -42,7 +42,7 @@ namespace StackfullTasks
 	private:
 
 		// Function Arguments
-		std::function<ReturnType(Tasklet*, ArgumentTypes... values)> m_function;
+		std::function<ReturnType(Fibre*, ArgumentTypes... values)> m_function;
 		std::tuple<ArgumentTypes...> m_arguments;
 		ReturnType m_return;
 

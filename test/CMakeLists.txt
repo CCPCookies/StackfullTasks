@@ -15,6 +15,6 @@ add_executable(stackfullTasksTest ${SRC_FILES})
 
 target_link_libraries(stackfullTasksTest stackfullTasks GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
-add_test(stackfullTasksTest TaskletppTest)
+add_test(stackfullTasksTest FibreppTest)
 
 target_compile_features(stackfullTasksTest PRIVATE cxx_std_17)

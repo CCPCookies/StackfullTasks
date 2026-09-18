@@ -1,18 +1,18 @@
-extern TaskletFunctionEntry : proto	;The main entry point, needs to have a reference to the current tasklet, this is currently global
+extern FibreFunctionEntry : proto	;The main entry point, needs to have a reference to the current fibre, this is currently global
 
 .data
 	ReturnStatus db ?
 
 .code
 
-StartNewTasklet proc
+StartNewFibre proc
 	; At this point the stack will contain the return instruction
 
-	; Add the parent stack pointer to the start of the Tasklets stack memory
+	; Add the parent stack pointer to the start of the Fibres stack memory
 	; Store in r11
 	mov r11,rsp
 
-	;Switch rsp to the Tasklet's stack memory
+	;Switch rsp to the Fibre's stack memory
 	mov rsp, rdx
 	;Add the parent stack pointer to the start of the new stack
 	push r11
@@ -24,10 +24,10 @@ StartNewTasklet proc
 	;Add space for shadow memory
 	sub rsp, 20h
 
-	; rcx already contains the active Tasklet here, no need to set it again
+	; rcx already contains the active Fibre here, no need to set it again
 
 	;Call to c++
-	call TaskletFunctionEntry
+	call FibreFunctionEntry
 
 	;Epilogue
 	mov rsp, rbp
@@ -43,10 +43,10 @@ StartNewTasklet proc
 
 	ret				
 
-StartNewTasklet endp
+StartNewFibre endp
 
 
-ResumeTasklet proc
+ResumeFibre proc
 
 	; Expects input registers as
 	; rcx - parent rsp
@@ -59,28 +59,28 @@ ResumeTasklet proc
 	; Which will be returned if not suspended
 	mov [ReturnStatus],2
 	
-	; Reinstate rsp to Tasklet
+	; Reinstate rsp to Fibre
 	mov rsp, [rdx]
 
 	ret	
 
-ResumeTasklet endp
+ResumeFibre endp
 
 
 ; External Procs
 
-; ---Run Tasklet Entry---
-RunTaskletASM proc
+; ---Run Fibre Entry---
+RunFibreASM proc
 	
 	; Expects input registers as
-	; rcx - ActiveTasklet
+	; rcx - ActiveFibre
 	; rdx - StackMemoryPointer
 
 	; Set Return value
 	; Set to FINISHED which is the value that is returned if Yield is not hit
 	mov [ReturnStatus],2
 
-	call StartNewTasklet
+	call StartNewFibre
 
 	;Prepare the return status code
 	mov rax,0							;Clear RAX
@@ -88,10 +88,10 @@ RunTaskletASM proc
 
 	ret				
 
-RunTaskletASM endp
+RunFibreASM endp
 
-; ---Yield Tasklet Entry---
-YieldTaskletASM proc
+; ---Yield Fibre Entry---
+YieldFibreASM proc
 	
 	; Expects input registers as
 	; rcx - parent rsp
@@ -109,22 +109,22 @@ YieldTaskletASM proc
 
 	ret				
 
-YieldTaskletASM endp
+YieldFibreASM endp
 
-; ---Resume Tasklet Entry---
-ResumeTaskletASM proc
+; ---Resume Fibre Entry---
+ResumeFibreASM proc
 
 	; Expects input registers as
 	; rcx - parent rsp
 	; rdx - rsp at yield which will be read
 
-	call ResumeTasklet
+	call ResumeFibre
 
 	mov rax,0							;Clear RAX
 	mov al,[ReturnStatus]				;Set lowest byte of RAX
 
 	ret				
 
-ResumeTaskletASM endp
+ResumeFibreASM endp
 
 end

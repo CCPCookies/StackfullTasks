@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Tasklet.h"
+#include "Fibre.h"
 
 namespace StackfullTasks
 {
 
-	class SimpleTask : public Tasklet
+	class SimpleTask : public Fibre
 	{
 	public:
 
-		SimpleTask(std::function<void(Tasklet* coroutine)> function);
+		SimpleTask(std::function<void(Fibre* coroutine)> function);
 
 		~SimpleTask();
 
@@ -17,7 +17,7 @@ namespace StackfullTasks
 
 	private:
 
-		std::function<void(Tasklet* coroutine)> m_function;
+		std::function<void(Fibre* coroutine)> m_function;
 
 	};
 

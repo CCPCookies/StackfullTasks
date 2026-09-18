@@ -9,13 +9,13 @@ struct TaskTest : public TestFixture
 
 // Test functions
 
-std::string TestTaskWithArgumentsAndReturnFunction(StackfullTasks::Tasklet* tasklet, std::string a, std::string b)
+std::string TestTaskWithArgumentsAndReturnFunction(StackfullTasks::Fibre* fibre, std::string a, std::string b)
 {
     std::string c = a + b;
 
     TestFixture::s_testInt = 1;
 
-    tasklet->Yield();
+    fibre->Yield();
 
     TestFixture::s_testInt = 2;
 
@@ -33,13 +33,13 @@ TEST_F(TaskTest, TestTaskWithArgumentsAndReturn)
 
     EXPECT_TRUE( task.Run() );
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::SUSPENDED);
 
     EXPECT_EQ(TestFixture::s_testInt, 1);
 
     EXPECT_TRUE( task.Run() );
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::FINISHED);
 
     EXPECT_EQ(TestFixture::s_testInt, 2);
 
@@ -48,24 +48,24 @@ TEST_F(TaskTest, TestTaskWithArgumentsAndReturn)
     EXPECT_EQ(stringReturn, a + b);
 }
 
-bool TestTaskletYeildFunction(StackfullTasks::Tasklet* tasklet, int a, int b)
+bool TestFibreYeildFunction(StackfullTasks::Fibre* fibre, int a, int b)
 {
     TestFixture::s_testInt = a;
 
-    tasklet->Yield();
+    fibre->Yield();
 
     TestFixture::s_testInt = b;
 
     return true;
 }
 
-bool TestTaskletSetParentFunction(StackfullTasks::Tasklet* tasklet, StackfullTasks::Tasklet* newParent, int a, int b)
+bool TestFibreSetParentFunction(StackfullTasks::Fibre* fibre, StackfullTasks::Fibre* newParent, int a, int b)
 {
-    tasklet->SetParent(newParent);
+    fibre->SetParent(newParent);
 
     TestFixture::s_testInt = a;
 
-    tasklet->Yield();
+    fibre->Yield();
 
     TestFixture::s_testInt = b;
 
@@ -75,7 +75,7 @@ bool TestTaskletSetParentFunction(StackfullTasks::Tasklet* tasklet, StackfullTas
 TEST_F(TaskTest, TestTaskWithParentChange)
 {
     // Run to yield and get back to main
-    StackfullTasks::Task<bool, int, int> task1(TestTaskletYeildFunction);
+    StackfullTasks::Task<bool, int, int> task1(TestFibreYeildFunction);
 
     int a = 1;
     int b = 2;
@@ -89,7 +89,7 @@ TEST_F(TaskTest, TestTaskWithParentChange)
     // Run another from main (parent is then main), pass in the first and internally change parent
     // Then when yield is hit it will switch to task1 rather than back to main which was the origional
     // parent
-    StackfullTasks::Task<bool, StackfullTasks::Tasklet*, int, int > task2(TestTaskletSetParentFunction);
+    StackfullTasks::Task<bool, StackfullTasks::Fibre*, int, int > task2(TestFibreSetParentFunction);
 
     int c = 3;
     int d = 4;

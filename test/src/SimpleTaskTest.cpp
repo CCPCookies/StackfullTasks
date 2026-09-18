@@ -8,47 +8,47 @@ struct SimpleTaskTest : public TestFixture
 };
 
 // Test functions
-void TestTaskEmpyFunction(StackfullTasks::Tasklet* tasklet)
+void TestTaskEmpyFunction(StackfullTasks::Fibre* fibre)
 {
     TestFixture::s_testInt = 1;
 }
 
-void TestTaskYeildFunction(StackfullTasks::Tasklet* tasklet)
+void TestTaskYeildFunction(StackfullTasks::Fibre* fibre)
 {
     TestFixture::s_testInt = 1;
 
-    tasklet->Yield();
+    fibre->Yield();
 
     TestFixture::s_testInt = 2;
 }
 
-void TestTaskMultiYeildFunction(StackfullTasks::Tasklet* tasklet)
+void TestTaskMultiYeildFunction(StackfullTasks::Fibre* fibre)
 {
     TestFixture::s_testInt = 1;
 
-    tasklet->Yield();
+    fibre->Yield();
 
     TestFixture::s_testInt = 2;
 
-    tasklet->Yield();
+    fibre->Yield();
 
     TestFixture::s_testInt = 3;
 }
 
-void TestTaskYeildFunctionWithBase(StackfullTasks::Tasklet* tasklet)
+void TestTaskYeildFunctionWithBase(StackfullTasks::Fibre* fibre)
 {
     TestFixture::s_testInt = -1;
 
-    tasklet->Yield();
+    fibre->Yield();
 
-    TestTaskYeildFunction(tasklet);
+    TestTaskYeildFunction(fibre);
 }
 
-void TestTaskKill(StackfullTasks::Tasklet* tasklet)
+void TestTaskKill(StackfullTasks::Fibre* fibre)
 {
     TestFixture::s_testInt = 1;
     
-    if (tasklet->Yield())
+    if (fibre->Yield())
     {
         TestFixture::s_testInt = 2;
     }
@@ -68,16 +68,16 @@ void TestTaskOneFunctionDeep()
 
 }
 
-void TestTaskRun(StackfullTasks::Tasklet& tasklet)
+void TestTaskRun(StackfullTasks::Fibre& fibre)
 {
-    EXPECT_TRUE(tasklet.Run());
+    EXPECT_TRUE(fibre.Run());
 }
 
-void TestCreateAndRunTask(StackfullTasks::Tasklet* activeTasklet)
+void TestCreateAndRunTask(StackfullTasks::Fibre* activeFibre)
 {
     TestFixture::s_testInt = 1;
 
-    activeTasklet->Yield();
+    activeFibre->Yield();
 
     StackfullTasks::SimpleTask innerTask(TestTaskYeildFunction);
 
@@ -101,7 +101,7 @@ TEST_F(SimpleTaskTest, TestSimpleTaskSwitch)
 
     EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::FINISHED);
 
     EXPECT_EQ(s_testInt, 1);
 }
@@ -114,7 +114,7 @@ TEST_F(SimpleTaskTest, TestSingleTaskYeild)
 
     EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::SUSPENDED);
 
     // Should have returned before setting s_testInt to 2
     EXPECT_EQ(s_testInt, 1);
@@ -128,13 +128,13 @@ TEST_F(SimpleTaskTest, TestSingleTaskYeildAndResume)
 
     EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::SUSPENDED);
 
     EXPECT_EQ(s_testInt, 1);
 
     EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::FINISHED);
 
     EXPECT_EQ(s_testInt, 2);
 }
@@ -166,13 +166,13 @@ TEST_F(SimpleTaskTest, TestSingleTaskYeildAndKill)
 
     EXPECT_TRUE(task.Run());
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::SUSPENDED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::SUSPENDED);
 
     EXPECT_EQ(s_testInt, 1);
 
     EXPECT_TRUE(task.Kill());
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::FINISHED);
 
     EXPECT_EQ(s_testInt, 3);
 }
@@ -217,7 +217,7 @@ TEST_F(SimpleTaskTest, TestSingleTaskWithBase)
 
     EXPECT_EQ(s_testInt, 2);
 
-    EXPECT_EQ(task.GetState(), StackfullTasks::TaskletState::FINISHED);
+    EXPECT_EQ(task.GetState(), StackfullTasks::FibreState::FINISHED);
 
 }
 

@@ -5,14 +5,14 @@ project(stackfullTasks VERSION 1.0.0)
 enable_language(C ASM_MASM)
 
 set(INCLUDE_FILES
-    include/Tasklet.h
+    include/Fibre.h
     include/Task.h
     include/SimpleTask.h
 )
 
 set(SRC_FILES
     src/StackSwitch.asm
-    src/Tasklet.cpp
+    src/Fibre.cpp
     src/SimpleTask.cpp
 )
 
