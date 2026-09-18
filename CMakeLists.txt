@@ -20,7 +20,8 @@ add_library(stackfullTasks ${SRC_FILES} ${INCLUDE_FILES})
 
 target_include_directories(stackfullTasks
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 )
 
 target_compile_features(stackfullTasks PRIVATE cxx_std_17)
@@ -30,9 +31,17 @@ if (BUILD_TESTING)
     add_subdirectory(test)
 endif ()
 
+
+install(
+        TARGETS stackfullTasks
+        EXPORT stackfullTasksTarget
+        CONFIGURATIONS ${CMAKE_CONFIGURATION_TYPES}
+        LIBRARY DESTINATION lib
+)
+
 install(FILES ${INCLUDE_FILES} DESTINATION include)
 
-install(TARGETS stackfullTasks
-        PUBLIC_HEADER
-          DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include
+install(EXPORT stackfullTasksTarget
+        DESTINATION share/stackfullTasks
+        FILE stackfullTasksTargets.cmake
 )
